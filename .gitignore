@@ -1,0 +1,25 @@
+# Gradle
+.gradle/
+build/
+.kotlin/
+
+# Configuración local (ruta del SDK de cada máquina)
+local.properties
+
+# Android Studio / IntelliJ
+*.iml
+.idea/workspace.xml
+.idea/caches/
+.idea/libraries/
+.idea/navEditor.xml
+.idea/assetWizardSettings.xml
+.idea/deploymentTargetSelector.xml
+captures/
+
+# Código nativo
+.externalNativeBuild/
+.cxx/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
