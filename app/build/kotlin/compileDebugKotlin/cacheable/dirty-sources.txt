@@ -1,0 +1,10 @@
+C:\Users\nakat\UADE\DesarrolloApps1\segundoParcial\Jornadas\app\src\main\java\ar\jornadas\legacy\AgendaImpresa.kt
+C:\Users\nakat\UADE\DesarrolloApps1\segundoParcial\Jornadas\app\src\main\java\ar\jornadas\data\AgendaRepository.kt
+C:\Users\nakat\UADE\DesarrolloApps1\segundoParcial\Jornadas\app\src\main\java\ar\jornadas\data\Programa.kt
+C:\Users\nakat\UADE\DesarrolloApps1\segundoParcial\Jornadas\app\src\main\java\ar\jornadas\lab\ServicioLocal.kt
+C:\Users\nakat\UADE\DesarrolloApps1\segundoParcial\Jornadas\app\src\main\java\ar\jornadas\MainActivity.kt
+C:\Users\nakat\UADE\DesarrolloApps1\segundoParcial\Jornadas\app\src\main\java\ar\jornadas\ui\Catalogo.kt
+C:\Users\nakat\UADE\DesarrolloApps1\segundoParcial\Jornadas\app\src\main\java\ar\jornadas\ui\ProgramaModel.kt
+C:\Users\nakat\UADE\DesarrolloApps1\segundoParcial\Jornadas\app\src\main\java\ar\jornadas\Servicios.kt
+C:\Users\nakat\UADE\DesarrolloApps1\segundoParcial\Jornadas\app\src\main\java\ar\jornadas\ui\Mesa.kt
+C:\Users\nakat\UADE\DesarrolloApps1\segundoParcial\Jornadas\app\src\main\java\ar\jornadas\ui\Portada.kt
