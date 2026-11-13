@@ -8,27 +8,39 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ar.jornadas.data.Charla
 
+private val DIAS = listOf("Ambos días", "Día 1", "Día 2")
+
 @Composable
-fun Catalogo(model: ProgramaModel, abrir: (String) -> Unit) {
-    LaunchedEffect(Unit) { model.recargar() }
-    val dia by model.dia.collectAsStateWithLifecycle()
-    var tema by remember { mutableStateOf("Todos") }
-    val fichas by model.charlas.collectAsStateWithLifecycle()
-    val aviso by model.aviso.collectAsStateWithLifecycle()
-    val cargando by model.cargando.collectAsStateWithLifecycle()
-    Selector(listOf("Ambos días", "Día 1", "Día 2"), dia) { model.dia.value = it }
-    val temas = listOf("Todos", "Android", "Datos", "Calidad")
-    Selector(temas, temas.indexOf(tema)) { tema = temas[it] }
-    TextButton(onClick = model::recargar) { Text("Actualizar") }
-    if (cargando) LinearProgressIndicator(Modifier.fillMaxWidth())
-    if (aviso.isNotEmpty()) {
-        Text(aviso)
-        OutlinedButton(onClick = model::recargar) { Text("Reintentar") }
-    } else {
-        Grilla(fichas.filter { (dia == 0 || it.dia == dia) && (tema == "Todos" || it.tema == tema) }, abrir)
+fun Catalogo(
+    estado: ProgramaUiState,
+    lista: LazyListState,
+    elegirDia: (Int) -> Unit,
+    elegirTema: (Tema) -> Unit,
+    actualizar: () -> Unit,
+    abrir: (String) -> Unit,
+) {
+    // Los filtros quedan habilitados también durante la espera.
+    Selector(DIAS, estado.dia, elegirDia)
+    Selector(Tema.entries.map { it.etiqueta }, estado.tema.ordinal) { elegirTema(Tema.entries[it]) }
+    TextButton(onClick = actualizar) { Text(if (estado.cargando) "Actualizando…" else "Actualizar") }
+    if (estado.cargando) LinearProgressIndicator(Modifier.fillMaxWidth())
+    when {
+        !estado.inicializado -> Unit
+        !estado.hayEdicion -> if (estado.fallo) {
+            Text("No se pudo descargar el programa.")
+            OutlinedButton(onClick = actualizar) { Text("Reintentar") }
+        }
+        else -> {
+            if (estado.fallo) Text("Sin conexión: se están usando datos guardados.",
+                color = MaterialTheme.colorScheme.secondary)
+            when {
+                estado.todas.isEmpty() -> Text("Sin charlas programadas.")
+                estado.visibles.isEmpty() -> Text("Ninguna charla coincide con los filtros.")
+                else -> Grilla(estado.visibles, abrir, lista)
+            }
+        }
     }
 }
 
@@ -42,8 +54,8 @@ private fun Selector(opciones: List<String>, indice: Int, elegir: (Int) -> Unit)
 }
 
 @Composable
-fun Grilla(fichas: List<Charla>, abrir: (String) -> Unit) {
-    LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp),
+fun Grilla(fichas: List<Charla>, abrir: (String) -> Unit, lista: LazyListState = rememberLazyListState()) {
+    LazyColumn(state = lista, verticalArrangement = Arrangement.spacedBy(8.dp),
         contentPadding = PaddingValues(bottom = 12.dp)) {
         items(fichas, key = { it.id }) { ficha ->
             ElevatedCard(onClick = { abrir(ficha.id) }, modifier = Modifier.fillMaxWidth()) {

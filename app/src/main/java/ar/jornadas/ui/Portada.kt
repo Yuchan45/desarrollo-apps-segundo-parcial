@@ -2,6 +2,7 @@ package ar.jornadas.ui
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
@@ -16,7 +17,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 fun Portada(model: ProgramaModel) {
     var seccion by rememberSaveable { mutableStateOf("Programa") }
     var detalle by rememberSaveable { mutableStateOf<String?>(null) }
-    val charlas by model.charlas.collectAsStateWithLifecycle()
+    val estado by model.estado.collectAsStateWithLifecycle()
+    // Elevado acá para que el scroll del catálogo sobreviva a entrar y salir de una ficha.
+    val listaPrograma = rememberLazyListState()
     BackHandler(detalle != null || seccion != "Programa") {
         if (detalle != null) detalle = null else seccion = "Programa"
     }
@@ -33,9 +36,10 @@ fun Portada(model: ProgramaModel) {
                 verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Spacer(Modifier.height(8.dp))
                 Text("Jornadas del Sur", style = MaterialTheme.typography.labelLarge)
-                if (detalle != null) {
+                val abierta = detalle
+                if (abierta != null) {
                     TextButton(onClick = { detalle = null }) { Text("Volver") }
-                    val ficha = charlas.find { it.id == detalle }
+                    val ficha = estado.todas.find { it.id == abierta }
                     if (ficha != null) Column(Modifier.verticalScroll(rememberScrollState()),
                         verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         Text(ficha.titulo, style = MaterialTheme.typography.headlineMedium)
@@ -45,16 +49,23 @@ fun Portada(model: ProgramaModel) {
                         Button(onClick = { model.marcar(ficha.id) }) {
                             Text(if (ficha.favorita) "Quitar de mi agenda" else "Agregar a mi agenda")
                         }
+                    } else if (estado.inicializado) {
+                        Text("Esta charla ya no está en el programa.")
                     }
                 } else {
                     Text(seccion, style = MaterialTheme.typography.headlineLarge)
                     when (seccion) {
-                        "Programa" -> Catalogo(model) { detalle = it }
-                        "Mi agenda" -> {
-                            val guardadas = charlas.filter { it.favorita }
-                            if (guardadas.isEmpty()) Text("Todavía no agregaste charlas.")
-                            Grilla(guardadas) { detalle = it }
-                        }
+                        "Programa" -> Catalogo(
+                            estado = estado,
+                            lista = listaPrograma,
+                            elegirDia = model::elegirDia,
+                            elegirTema = model::elegirTema,
+                            actualizar = model::actualizar,
+                            abrir = { detalle = it },
+                        )
+                        "Mi agenda" ->
+                            if (estado.agenda.isEmpty()) Text("Todavía no agregaste charlas.")
+                            else Grilla(estado.agenda, { detalle = it })
                         else -> Mesa(model.mesa)
                     }
                 }
